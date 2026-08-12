@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             TenantSeeder::class,
             RbacSeeder::class,
             MembershipSeeder::class,
+            PaymentConfigSeeder::class,
         ]);
     }
 }
