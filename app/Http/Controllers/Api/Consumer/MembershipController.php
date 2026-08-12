@@ -54,4 +54,30 @@ class MembershipController extends Controller
             return response()->json(['message' => 'Failed to process purchase: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Get the consumer's purchase history.
+     */
+    public function purchases(Request $request): JsonResponse
+    {
+        $purchases = \App\Models\MembershipPurchase::with('membership')
+            ->where('consumer_id', $request->user()->id)
+            ->latest()
+            ->get();
+
+        $data = $purchases->map(function ($purchase) {
+            return [
+                'membership' => [
+                    'id' => $purchase->membership->id,
+                    'name' => $purchase->membership->name,
+                ],
+                'billing_cycle' => $purchase->billing_cycle,
+                'amount' => (float) $purchase->amount,
+                'status' => $purchase->status,
+                'purchased_at' => $purchase->purchased_at ? $purchase->purchased_at->toIso8601String() : null,
+            ];
+        });
+
+        return response()->json(['data' => $data]);
+    }
 }

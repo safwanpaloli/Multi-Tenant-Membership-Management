@@ -3,11 +3,9 @@
 namespace App\Services;
 
 use App\Models\Membership;
-use App\Models\Payment;
-use App\Models\Subscription;
-use App\Models\Tenant;
+use App\Models\MembershipPurchase;
 use App\Models\User;
-use App\Services\PaymentGateways\PaymentGatewayFactory;
+use App\Services\PaymentGateways\PaymentProviderFactory;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use RuntimeException;
@@ -20,10 +18,10 @@ class MembershipPurchaseService
      * @param User $user
      * @param Membership $membership
      * @param string $billingCycle
-     * @return Subscription
+     * @return MembershipPurchase
      * @throws \Exception
      */
-    public function purchase(User $user, Membership $membership, string $billingCycle): Subscription
+    public function purchase(User $user, Membership $membership, string $billingCycle): MembershipPurchase
     {
         if (! in_array($billingCycle, ['monthly', 'yearly'])) {
             throw new InvalidArgumentException("Invalid billing cycle.");
@@ -44,8 +42,8 @@ class MembershipPurchaseService
                 ->firstOrFail();
 
             // Count existing free allocations
-            $allocatedFreeCount = Subscription::where('membership_id', $lockedMembership->id)
-                ->where('is_free_allocation', true)
+            $allocatedFreeCount = MembershipPurchase::where('membership_id', $lockedMembership->id)
+                ->where('amount', 0) // Free allocations have 0 price
                 ->count();
 
             $isFreeAllocation = $allocatedFreeCount < $lockedMembership->free_membership_limit;
@@ -57,53 +55,83 @@ class MembershipPurchaseService
                     : (float) $lockedMembership->yearly_price;
             }
 
+            $paymentId = null;
+            $paymentProvider = null;
+            $status = 'paid';
+
             // If it's a paid transaction, process payment
-            $transactionId = null;
             if ($price > 0) {
                 // Resolve the tenant's gateway
                 $tenant = $lockedMembership->tenant;
-                $gateway = PaymentGatewayFactory::makeForTenant($tenant);
+                $gateway = PaymentProviderFactory::make($tenant);
 
                 // Charge the customer
-                $paymentResult = $gateway->charge($price, 'USD', [
-                    'user_id' => $user->id,
-                    'membership_id' => $lockedMembership->id,
-                ]);
-
-                if (! $paymentResult['success']) {
-                    throw new RuntimeException("Payment failed: " . ($paymentResult['error'] ?? 'Unknown error'));
-                }
-
-                $transactionId = $paymentResult['transaction_id'];
-
-                // Record the payment
-                Payment::create([
-                    'tenant_id' => $tenant->id,
+                $paymentResult = $gateway->createPayment([
                     'user_id' => $user->id,
                     'membership_id' => $lockedMembership->id,
                     'amount' => $price,
-                    'currency' => 'USD',
-                    'gateway' => $tenant->payment_gateway_config['provider'] ?? 'mock',
-                    'transaction_id' => $transactionId,
-                    'status' => 'success',
                 ]);
+
+                if (! $paymentResult->success) {
+                    throw new RuntimeException("Payment failed: " . ($paymentResult->error ?? 'Unknown error'));
+                }
+
+                $paymentId = $paymentResult->paymentId;
+                
+                // Get provider name
+                $config = $tenant->paymentConfigs()->where('is_active', true)->first();
+                $paymentProvider = $config ? $config->provider : null;
+                $status = $paymentResult->status;
             }
 
-            // Create the subscription
-            $expiresAt = $billingCycle === 'monthly' ? now()->addMonth() : now()->addYear();
-
-            $subscription = Subscription::create([
-                'user_id' => $user->id,
+            // Record the purchase
+            $purchase = MembershipPurchase::create([
+                'tenant_id' => $lockedMembership->tenant_id,
+                'consumer_id' => $user->id,
                 'membership_id' => $lockedMembership->id,
-                'status' => 'active',
+                'payment_id' => $paymentId,
+                'payment_provider' => $paymentProvider,
                 'billing_cycle' => $billingCycle,
-                'price' => $price,
-                'is_free_allocation' => $isFreeAllocation,
-                'starts_at' => now(),
-                'expires_at' => $expiresAt,
+                'amount' => $price,
+                'currency' => 'USD',
+                'status' => $status,
+                'purchased_at' => now(),
             ]);
 
-            return $subscription;
+            return $purchase;
         });
+    }
+
+    /**
+     * Get paginated purchases for an admin.
+     */
+    public function getAdminPurchases(int $tenantId, array $filters = [], int $perPage = 15)
+    {
+        $query = MembershipPurchase::where('tenant_id', $tenantId)->with(['consumer', 'membership']);
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->whereHas('consumer', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['membership_id'])) {
+            $query->where('membership_id', $filters['membership_id']);
+        }
+
+        if (!empty($filters['date_from'])) {
+            $query->where('purchased_at', '>=', $filters['date_from']);
+        }
+
+        if (!empty($filters['date_to'])) {
+            $query->where('purchased_at', '<=', $filters['date_to']);
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 }

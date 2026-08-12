@@ -21,7 +21,7 @@ class ConsumerMembershipResource extends JsonResource
             'benefits' => $this->benefits,
             'monthly_price' => (float) $this->monthly_price,
             'yearly_price' => (float) $this->yearly_price,
-            'available_free_memberships' => max(0, $this->free_membership_limit - \App\Models\Subscription::where('membership_id', $this->id)->where('is_free_allocation', true)->count()),
+            'available_free_memberships' => max(0, $this->free_membership_limit - \App\Models\MembershipPurchase::where('membership_id', $this->id)->where('amount', 0)->count()),
         ];
     }
 }
