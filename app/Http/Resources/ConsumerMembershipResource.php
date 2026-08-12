@@ -21,8 +21,7 @@ class ConsumerMembershipResource extends JsonResource
             'benefits' => $this->benefits,
             'monthly_price' => (float) $this->monthly_price,
             'yearly_price' => (float) $this->yearly_price,
-            // Since we don't track user enrollments yet, we will mock available_free_memberships to free_membership_limit
-            'available_free_memberships' => $this->free_membership_limit,
+            'available_free_memberships' => max(0, $this->free_membership_limit - \App\Models\Subscription::where('membership_id', $this->id)->where('is_free_allocation', true)->count()),
         ];
     }
 }

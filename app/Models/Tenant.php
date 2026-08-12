@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'slug', 'status', 'description'])]
+#[Fillable(['name', 'slug', 'status', 'description', 'payment_gateway_config'])]
 class Tenant extends Model
 {
     public function users(): HasMany
@@ -28,6 +28,7 @@ class Tenant extends Model
     {
         return [
             'status' => 'string',
+            'payment_gateway_config' => 'array',
         ];
     }
 }

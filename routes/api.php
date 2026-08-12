@@ -30,5 +30,8 @@ Route::prefix('consumer')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/memberships', [ConsumerMembershipController::class, 'index'])
             ->name('consumer.memberships.index');
+        
+        Route::post('/memberships/{membership}/purchase', [ConsumerMembershipController::class, 'purchase'])
+            ->name('consumer.memberships.purchase');
     });
 });
