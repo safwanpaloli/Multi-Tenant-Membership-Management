@@ -24,8 +24,7 @@ class AuthController extends Controller
     {
         $result = $this->authService->registerConsumer($request->validated());
 
-        return response()->json([
-            'message' => 'Registration successful.',
+        return $this->successResponse('Registration successful.', [
             'token' => $result['token'],
             'token_type' => 'Bearer',
             'user' => [
@@ -45,8 +44,7 @@ class AuthController extends Controller
     {
         $result = $this->authService->authenticateConsumer($request->validated());
 
-        return response()->json([
-            'message' => 'Login successful.',
+        return $this->successResponse('Login successful.', [
             'token' => $result['token'],
             'token_type' => 'Bearer',
             'user' => [

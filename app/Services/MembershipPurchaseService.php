@@ -28,11 +28,11 @@ class MembershipPurchaseService
         }
 
         if ($membership->tenant_id !== $user->tenant_id) {
-            throw new InvalidArgumentException("Membership does not belong to your tenant.");
+            abort(404, "Membership not found.");
         }
 
         if ($membership->status->value !== 'active') { // Assuming MembershipStatus is an enum
-            throw new InvalidArgumentException("This membership is not active.");
+            abort(400, "This membership is not active.");
         }
 
         return DB::transaction(function () use ($user, $membership, $billingCycle) {

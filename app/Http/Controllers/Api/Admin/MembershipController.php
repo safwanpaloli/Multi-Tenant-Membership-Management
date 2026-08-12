@@ -30,7 +30,7 @@ class MembershipController extends Controller
 
         $memberships = $this->membershipService->getMembershipsForTenant($request->user()->tenant_id, $filters, $perPage);
 
-        return response()->json($memberships);
+        return $this->successResponse('Memberships retrieved successfully.', $memberships);
     }
 
     /**
@@ -45,10 +45,7 @@ class MembershipController extends Controller
             $request->validated()
         );
 
-        return response()->json([
-            'message' => 'Membership created.',
-            'membership' => $membership,
-        ], 201);
+        return $this->successResponse('Membership created successfully.', ['membership' => $membership], 201);
     }
 
     /**
@@ -60,7 +57,7 @@ class MembershipController extends Controller
 
         $membership = $this->membershipService->getMembershipForTenant($request->user()->tenant_id, $id);
 
-        return response()->json(['membership' => $membership]);
+        return $this->successResponse('Membership retrieved successfully.', ['membership' => $membership]);
     }
 
     /**
@@ -76,10 +73,7 @@ class MembershipController extends Controller
             $request->validated()
         );
 
-        return response()->json([
-            'message' => 'Membership updated.',
-            'membership' => $membership,
-        ]);
+        return $this->successResponse('Membership updated successfully.', ['membership' => $membership]);
     }
 
     /**
@@ -91,6 +85,6 @@ class MembershipController extends Controller
 
         $this->membershipService->deleteMembership($request->user()->tenant_id, $id);
 
-        return response()->json(['message' => 'Membership deleted.']);
+        return $this->successResponse('Membership deleted successfully.');
     }
 }

@@ -24,9 +24,7 @@ class MembershipController extends Controller
     {
         $memberships = $this->membershipService->getMembershipsForTenant($request->user()->tenant_id);
 
-        return response()->json([
-            'data' => ConsumerMembershipResource::collection($memberships->items()),
-        ]);
+        return $this->successResponse('Memberships retrieved successfully.', ConsumerMembershipResource::collection($memberships->items()));
     }
 
     /**
@@ -37,22 +35,13 @@ class MembershipController extends Controller
         \App\Models\Membership $membership,
         \App\Services\MembershipPurchaseService $purchaseService
     ): JsonResponse {
-        try {
-            $subscription = $purchaseService->purchase(
-                $request->user(),
-                $membership,
-                $request->validated('billing_cycle')
-            );
+        $subscription = $purchaseService->purchase(
+            $request->user(),
+            $membership,
+            $request->validated('billing_cycle')
+        );
 
-            return response()->json([
-                'message' => 'Membership purchased successfully.',
-                'subscription' => $subscription,
-            ], 201);
-        } catch (\InvalidArgumentException $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to process purchase: ' . $e->getMessage()], 500);
-        }
+        return $this->successResponse('Membership purchased successfully.', $subscription, 201);
     }
 
     /**
@@ -78,6 +67,6 @@ class MembershipController extends Controller
             ];
         });
 
-        return response()->json(['data' => $data]);
+        return $this->successResponse('Purchase history retrieved successfully.', $data);
     }
 }

@@ -23,8 +23,7 @@ class AuthController extends Controller
     {
         $result = $this->authService->authenticateAdmin($request->validated());
 
-        return response()->json([
-            'message' => 'Login successful.',
+        return $this->successResponse('Login successful.', [
             'token' => $result['token'],
             'token_type' => 'Bearer',
             'user' => [

@@ -24,7 +24,33 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
-        );
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if ($request->is('api/*')) {
+                $statusCode = 500;
+                $message = $e->getMessage() ?: 'Server Error';
+                $errors = [];
+
+                if ($e instanceof \Illuminate\Validation\ValidationException) {
+                    $statusCode = 422;
+                    $message = 'Validation failed.';
+                    $errors = collect($e->errors())->flatten()->toArray();
+                } elseif ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                    $statusCode = 404;
+                    $message = 'Resource not found.';
+                } elseif ($e instanceof \Illuminate\Auth\AuthenticationException) {
+                    $statusCode = 401;
+                    $message = 'Unauthenticated.';
+                } elseif ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+                    $statusCode = $e->getStatusCode();
+                } elseif ($e instanceof \InvalidArgumentException) {
+                    $statusCode = 400;
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'errors' => $errors,
+                ], $statusCode);
+            }
+        });
     })->create();

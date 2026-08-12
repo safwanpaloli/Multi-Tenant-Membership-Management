@@ -29,6 +29,6 @@ class MembershipPurchaseController extends Controller
             $request->input('per_page', 15)
         );
 
-        return response()->json($purchases);
+        return $this->successResponse('Purchases retrieved successfully.', $purchases);
     }
 }

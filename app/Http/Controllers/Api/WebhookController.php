@@ -13,7 +13,7 @@ class WebhookController extends Controller
     {
         // Simple mock signature verification
         if ($request->header('X-Signature') !== 'mock-signature') {
-            return response()->json(['message' => 'Invalid signature'], 401);
+            return $this->errorResponse('Invalid signature', [], 401);
         }
 
         $payload = $request->all();
@@ -21,7 +21,7 @@ class WebhookController extends Controller
         $status = $payload['status'] ?? null;
 
         if (! $paymentId || ! $status) {
-            return response()->json(['message' => 'Invalid payload'], 400);
+            return $this->errorResponse('Invalid payload', [], 400);
         }
 
         // Find the purchase by payment_id and provider
@@ -30,7 +30,7 @@ class WebhookController extends Controller
             ->first();
 
         if (! $purchase) {
-            return response()->json(['message' => 'Purchase not found'], 404);
+            return $this->errorResponse('Purchase not found', [], 404);
         }
 
         // Idempotency: Don't update if already in a final state and event is old, etc.
@@ -42,6 +42,6 @@ class WebhookController extends Controller
             ]);
         }
 
-        return response()->json(['message' => 'Webhook processed successfully']);
+        return $this->successResponse('Webhook processed successfully.');
     }
 }
