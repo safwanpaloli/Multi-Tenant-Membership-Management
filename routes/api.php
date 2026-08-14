@@ -7,6 +7,15 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Consumer\MembershipController as ConsumerMembershipController;
 use App\Http\Controllers\Api\Admin\MembershipPurchaseController;
+use Illuminate\Http\Request;
+
+Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
+    $request->user()->currentAccessToken()->delete();
+    return response()->json([
+        'success' => true,
+        'message' => 'Logged out successfully.'
+    ]);
+})->name('logout');
 
 Route::prefix('admin')->group(function () {
     Route::post('/login', [AdminAuthController::class, 'login'])
@@ -19,6 +28,8 @@ Route::prefix('admin')->group(function () {
 
         Route::get('/membership-purchases', [MembershipPurchaseController::class, 'index'])
             ->name('admin.membership-purchases.index');
+        Route::get('/membership-purchases/{id}', [MembershipPurchaseController::class, 'show'])
+            ->name('admin.membership-purchases.show');
     });
 });
 
@@ -34,6 +45,9 @@ Route::prefix('consumer')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('/memberships', [ConsumerMembershipController::class, 'index'])
             ->name('consumer.memberships.index');
+            
+        Route::get('/memberships/{membership}', [ConsumerMembershipController::class, 'show'])
+            ->name('consumer.memberships.show');
             
         Route::get('/me/memberships', [ConsumerMembershipController::class, 'purchases'])
             ->name('consumer.memberships.purchases');

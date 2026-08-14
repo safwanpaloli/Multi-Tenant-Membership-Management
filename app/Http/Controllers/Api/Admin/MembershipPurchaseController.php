@@ -31,4 +31,23 @@ class MembershipPurchaseController extends Controller
 
         return $this->successResponse('Purchases retrieved successfully.', $purchases);
     }
+
+    /**
+     * Show a single membership purchase for the admin's tenant.
+     */
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $purchase = \App\Models\MembershipPurchase::with(['membership', 'consumer'])
+            ->where('id', $id)
+            ->whereHas('membership', function ($query) use ($request) {
+                $query->where('tenant_id', $request->user()->tenant_id);
+            })
+            ->first();
+
+        if (! $purchase) {
+            return $this->errorResponse('Purchase not found.', [], 404);
+        }
+
+        return $this->successResponse('Purchase retrieved successfully.', $purchase);
+    }
 }

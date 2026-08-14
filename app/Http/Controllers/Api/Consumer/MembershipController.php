@@ -28,6 +28,18 @@ class MembershipController extends Controller
     }
 
     /**
+     * Show a single available membership for the consumer.
+     */
+    public function show(Request $request, \App\Models\Membership $membership): JsonResponse
+    {
+        if ($membership->tenant_id !== $request->user()->tenant_id) {
+            return $this->errorResponse('Membership not found.', [], 404);
+        }
+
+        return $this->successResponse('Membership retrieved successfully.', new ConsumerMembershipResource($membership));
+    }
+
+    /**
      * Purchase a membership.
      */
     public function purchase(
