@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "34ff8da17ad63c593e21dae30786cdcb",
+    "content-hash": "d3b5085042997d86771ce586b74f138f",
     "packages": [
         {
             "name": "brick/math",
@@ -3368,6 +3368,133 @@
                 "source": "https://github.com/ramsey/uuid/tree/4.9.3"
             },
             "time": "2026-06-18T03:57:49+00:00"
+        },
+        {
+            "name": "srmklive/paypal",
+            "version": "3.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/blendbyte/laravel-paypal.git",
+                "reference": "522834a22fbd10e8fa1be21cb7c84d3d45c3a763"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/blendbyte/laravel-paypal/zipball/522834a22fbd10e8fa1be21cb7c84d3d45c3a763",
+                "reference": "522834a22fbd10e8fa1be21cb7c84d3d45c3a763",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.9",
+                "guzzlehttp/psr7": "^2.0",
+                "illuminate/support": "^12.0|^13.0",
+                "nesbot/carbon": "^3.0",
+                "php": "^8.2",
+                "psr/http-client": "^1.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.0",
+                "laravel/framework": "^12.0|^13.0",
+                "laravel/pint": "^1.29",
+                "orchestra/testbench": "^10.0|^11.0",
+                "pestphp/pest": "^3.0|^4.0",
+                "phpunit/phpunit": "^11.0|^12.0",
+                "symfony/var-dumper": "^7.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "PayPal": "Srmklive\\PayPal\\Facades\\PayPal"
+                    },
+                    "providers": [
+                        "Srmklive\\PayPal\\Providers\\PayPalServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Srmklive\\PayPal\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PayPal REST API client for Laravel and standalone PHP.",
+            "keywords": [
+                "REST API",
+                "laravel",
+                "payments",
+                "paypal"
+            ],
+            "support": {
+                "issues": "https://github.com/blendbyte/laravel-paypal/issues",
+                "source": "https://github.com/blendbyte/laravel-paypal/tree/3.1.1"
+            },
+            "time": "2026-04-18T05:16:56+00:00"
+        },
+        {
+            "name": "stripe/stripe-php",
+            "version": "v21.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/stripe/stripe-php.git",
+                "reference": "edf8118f0b96d69f06f372da9168d613d1aed072"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/edf8118f0b96d69f06f372da9168d613d1aed072",
+                "reference": "edf8118f0b96d69f06f372da9168d613d1aed072",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "php": ">=7.2.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "3.94.0",
+                "phpstan/phpstan": "^1.2",
+                "phpunit/phpunit": "^8.0 || ^9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "lib/version_check.php",
+                    "lib/agent_plugin_hint.php"
+                ],
+                "psr-4": {
+                    "Stripe\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Stripe and contributors",
+                    "homepage": "https://github.com/stripe/stripe-php/contributors"
+                }
+            ],
+            "description": "Stripe PHP Library",
+            "homepage": "https://stripe.com/",
+            "keywords": [
+                "api",
+                "payment processing",
+                "stripe"
+            ],
+            "support": {
+                "issues": "https://github.com/stripe/stripe-php/issues",
+                "source": "https://github.com/stripe/stripe-php/tree/v21.2.0"
+            },
+            "time": "2026-08-10T22:11:35+00:00"
         },
         {
             "name": "symfony/clock",

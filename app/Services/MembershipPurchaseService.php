@@ -21,7 +21,8 @@ class MembershipPurchaseService
      * @return MembershipPurchase
      * @throws \Exception
      */
-    public function purchase(User $user, Membership $membership, string $billingCycle): MembershipPurchase
+
+    public function purchase(User $user, Membership $membership, string $billingCycle, ?string $paymentToken = null): MembershipPurchase
     {
         if (! in_array($billingCycle, ['monthly', 'yearly'])) {
             throw new InvalidArgumentException("Invalid billing cycle.");
@@ -35,7 +36,7 @@ class MembershipPurchaseService
             abort(400, "This membership is not active.");
         }
 
-        return DB::transaction(function () use ($user, $membership, $billingCycle) {
+        return DB::transaction(function () use ($user, $membership, $billingCycle, $paymentToken) {
             // Lock the membership row for update to prevent concurrent free limit bypass
             $lockedMembership = Membership::where('id', $membership->id)
                 ->lockForUpdate()
@@ -70,6 +71,7 @@ class MembershipPurchaseService
                     'user_id' => $user->id,
                     'membership_id' => $lockedMembership->id,
                     'amount' => $price,
+                    'token' => $paymentToken,
                 ]);
 
                 if (! $paymentResult->success) {
